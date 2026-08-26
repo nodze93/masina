@@ -232,6 +232,7 @@ function primijeni(){
   }
   D = Object.assign({}, D_ALL, {trades:t, days:days,
         open: (D_ALL.open && (ACCT==='ALL' || D_ALL.open.acct===ACCT)) ? D_ALL.open : null});
+  if(typeof indeksiraj==='function') indeksiraj();
   if(typeof boot==='function') boot();
 }
 document.addEventListener('click', e=>{
@@ -256,25 +257,32 @@ async function ucitaj(){
   }
 }
 setInterval(ucitaj, 120000);   // osvjezi svake 2 min
-const T={}; D.trades.forEach(t=>T[t.id]=t);
+let T={};
+function indeksiraj(){ T={}; (D.trades||[]).forEach(t=>T[t.id]=t); }
 const f=(n,d=0)=>(n>0?"+":"")+n.toLocaleString("bs-BA",{minimumFractionDigits:d,maximumFractionDigits:d});
 const dkeys=Object.keys(D.days).sort();
 let curM=7, curY=2026, selDay=null;
 
 // ---------- DANAS ----------
 function renderToday(){
-  const td=D.days[D.today]||{pnl:0,trades:[]};
+  const dkeysNow=Object.keys(D.days||{}).sort();
+  const danas=(D.today && D.days[D.today]) ? D.today : (dkeysNow[dkeysNow.length-1]||"");
+  const td=(D.days&&D.days[danas])||{pnl:0,trades:[]};
   const el=document.getElementById("tPnl");
   el.textContent=f(td.pnl,0); el.className="big "+(td.pnl>=0?"g":"r");
   document.getElementById("tR").textContent=f(td.pnl/48,1)+"R";
   // mjesec
-  let m=0; dkeys.forEach(k=>{if(k.startsWith(D.today.slice(0,7)))m+=D.days[k].pnl});
+  let m=0; dkeys.forEach(k=>{if(danas && k.startsWith(danas.slice(0,7)))m+=D.days[k].pnl});
   const me=document.getElementById("mPnl"); me.textContent=f(m,0)+" $"; me.className=m>=0?"g":"r";
   let a=0; dkeys.forEach(k=>a+=D.days[k].pnl);
   document.getElementById("aPnl").textContent=f(a,0)+" $";
   // otvorena pozicija
   const o=D.open;
-  const rng=o.t2-o.stop, pos=Math.max(0,Math.min(1,(o.cur-o.stop)/rng)), ent=(o.entry-o.stop)/rng;
+  if(!o){                                   // nema otvorene pozicije -> sakrij panel
+    document.getElementById("openWrap").innerHTML =
+      '<div class="pad" style="text-align:center;color:var(--tx3);font-size:12.5px;padding:16px">Nema otvorene pozicije.</div>';
+  } else {
+  const rng=(o.t2-o.stop)||1, pos=Math.max(0,Math.min(1,(o.cur-o.stop)/rng)), ent=(o.entry-o.stop)/rng;
   document.getElementById("openWrap").innerHTML=`
    <div class="pad" style="padding-top:0;padding-bottom:16px"><div class="box" style="border-radius:12px;padding:13px 14px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px">
@@ -291,9 +299,10 @@ function renderToday(){
     <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);margin-top:4px;font-weight:500">
       <span>stop ${o.stop}</span><span style="color:#475569">ulaz ${o.entry}</span><span>6R ${o.t2}</span></div>
    </div></div>`;
+  }
   document.getElementById("tToday").innerHTML = td.trades.length
-    ? td.trades.map(id=>trRow(T[id])).join("") + trRow(null,o)
-    : trRow(null,o);
+    ? td.trades.map(id=>trRow(T[id])).join("") + (o?trRow(null,o):"")
+    : (o ? trRow(null,o) : '<div style="font-size:12.5px;color:var(--tx3);padding:6px 2px">Danas još nema trejdova.</div>');
 }
 function trRow(t,op){
   if(op) return `<div class="row" style="border-color:#BBF7D0;background:#F0FDF4">
@@ -558,6 +567,13 @@ function renderKapije(){
   }).join("") : '<div style="font-size:12.5px;color:var(--tx3);text-align:center;padding:14px">Noge još nisu trgovale.</div>';
 }
 
-function boot(){ renderToday(); renderKapije(); renderStats(); renderCal(); renderTrades(); }
+function boot(){
+  const koraci=[["Danas",renderToday],["Kapije",renderKapije],["Statistika",renderStats],
+                ["Kalendar",renderCal],["Trejdovi",renderTrades]];
+  for(const [ime,fn] of koraci){
+    try{ fn(); }
+    catch(err){ console.error("greska u "+ime, err); }
+  }
+}
 ucitaj();   // povuci data.json s GitHub Pages, pa iscrtaj
 </script></body></html>
