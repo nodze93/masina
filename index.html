@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="bs"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>ES Bot — Journal</title>
+<style>
+:root{--bg:#F1F5F9;--card:#fff;--bd:#E2E8F0;--bd2:#F1F5F9;--tx:#0F172A;--tx2:#64748B;--tx3:#94A3B8;
+--grn:#16A34A;--grn2:#DCFCE7;--grn3:#86EFAC;--red:#DC2626;--red2:#FEE2E2;--red3:#FCA5A5;--ind:#4F46E5;--sf:#F8FAFC}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 Inter,-apple-system,system-ui,"Segoe UI",sans-serif;padding-bottom:74px}
+.wrap{max-width:480px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:0 1px 3px rgba(15,23,42,.06);margin-bottom:12px;overflow:hidden}
+.pad{padding:15px 17px}
+.hd{padding:15px 17px 13px;border-bottom:1px solid var(--bd2);display:flex;justify-content:space-between;align-items:center}
+.lbl{font-size:9px;color:var(--tx3);letter-spacing:.4px;text-transform:uppercase;font-weight:600}
+.big{font-size:34px;font-weight:700;letter-spacing:-1.2px}
+.g{color:var(--grn)}.r{color:var(--red)}.m{color:var(--tx2)}
+.pill{display:flex;align-items:center;gap:6px;background:var(--grn2);border:1px solid var(--grn3);padding:5px 10px;border-radius:20px;font-size:11px;color:#15803D;font-weight:600}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--grn);animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.35}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.box{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:11px 12px}
+.bar{height:4px;background:var(--bd);border-radius:2px;margin-top:7px;overflow:hidden}
+.bar>i{display:block;height:4px;border-radius:2px}
+.badge{font-size:9px;font-weight:700;padding:3px 7px;border-radius:5px;letter-spacing:.3px}
+.bg{background:var(--grn2);color:#15803D}.br{background:var(--red2);color:#B91C1C}.bi{background:#E0E7FF;color:#3730A3}
+.row{border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.12s}
+.row:active{background:var(--sf);transform:scale(.985)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal .wd{font-size:9px;color:var(--tx3);text-align:center;font-weight:600}
+.cell{aspect-ratio:1;border-radius:7px;background:var(--sf);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.cell.t{cursor:pointer}.cell.t:active{transform:scale(.92)}
+.cell.sel{box-shadow:0 0 0 2px var(--ind)}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-top:1px solid var(--bd);display:flex;padding:7px 0 max(7px,env(safe-area-inset-bottom))}
+nav b{flex:1;text-align:center;font-size:10px;font-weight:600;color:var(--tx3);cursor:pointer;padding:5px 0}
+nav b.on{color:var(--ind)}
+nav b i{display:block;font-size:17px;font-style:normal;margin-bottom:1px}
+.sec{display:none}.sec.on{display:block;animation:f .18s ease}
+@keyframes f{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.tl{border-left:2px solid var(--bd);padding-left:13px;margin-left:3px}
+.tl>div{position:relative;padding-bottom:12px}
+.tl>div:last-child{padding-bottom:0}
+.tl i{position:absolute;left:-19px;top:3px;width:9px;height:9px;border-radius:50%;border:2px solid #fff}
+.back{font-size:12px;color:var(--ind);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;margin-bottom:10px}
+.tip{background:var(--sf);border-top:1px solid var(--bd2);padding:12px 17px;display:flex;gap:9px;font-size:11px;color:#475569;line-height:1.5}
+h3{margin:0;font-size:13px;font-weight:600}
+.sub{font-size:11px;color:var(--tx3);margin-top:1px}
+</style></head><body>
+<div id="acctBar" style="display:flex;gap:6px;align-items:center;padding:8px 14px 0;font:600 12px system-ui,-apple-system,sans-serif">
+  <span style="opacity:.55;font-weight:500">Račun</span>
+  <button class="ab on" data-a="ALL">Oba</button>
+  <button class="ab" data-a="Sim1">Sim1</button>
+  <button class="ab" data-a="Sim2">Sim2</button>
+  <span id="azur" style="margin-left:auto;opacity:.45;font-weight:400;font-size:11px"></span>
+</div>
+<style>
+#acctBar .ab{background:transparent;border:1px solid rgba(128,128,128,.35);color:inherit;
+  border-radius:999px;padding:5px 12px;font:inherit;cursor:pointer;opacity:.6}
+#acctBar .ab.on{opacity:1;border-color:currentColor;background:rgba(128,128,128,.14)}
+</style>
+
+<div class="wrap">
+
+<!-- ============ DANAS ============ -->
+<section id="s-today" class="sec on">
+  <div class="card">
+    <div class="hd">
+      <div><h3>ES Bot</h3><div class="sub">Lucid 25K · MESU26 · C konfiguracija</div></div>
+      <div class="pill"><span class="dot"></span>Uživo</div>
+    </div>
+    <div class="pad" style="padding-bottom:12px">
+      <div class="lbl">Neto P&L danas</div>
+      <div style="display:flex;align-items:baseline;gap:9px;margin-top:3px">
+        <span class="big" id="tPnl">+118</span><span style="font-size:15px;color:var(--tx3);font-weight:500">$</span>
+        <span id="tR" style="margin-left:auto;font-size:11px;background:var(--grn2);border:1px solid var(--grn3);color:#15803D;padding:3px 8px;border-radius:6px;font-weight:600">+2,4R</span>
+      </div>
+    </div>
+    <div class="pad" style="padding-top:0;padding-bottom:15px"><div class="grid2">
+      <div class="box"><div class="lbl">Mjesec</div><div id="mPnl" style="font-size:18px;font-weight:700;margin-top:2px" class="g">+643 $</div></div>
+      <div class="box"><div class="lbl">Ukupno</div><div id="aPnl" style="font-size:18px;font-weight:700;margin-top:2px">+3.124 $</div></div>
+    </div></div>
+    <div id="openWrap"></div>
+    <div class="pad" style="padding-top:0">
+      <div style="font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:8px">Trejdovi danas</div>
+      <div id="tToday"></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============ KAPIJE ============ -->
+<section id="s-kapije" class="sec">
+  <div class="wrap" style="padding:0">
+  <div class="card"><div class="hd"><b>Klizanje</b><span id="klizSud" class="pill"></span></div>
+    <div class="pad">
+      <div style="display:flex;align-items:flex-end;gap:2px;height:56px;border-bottom:1px solid var(--bd);margin-bottom:10px" id="tape"></div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span id="klizAvg" style="font-size:32px;font-weight:700;letter-spacing:-.02em">—</span>
+        <span style="font-size:12px;color:var(--tx2)">tik prosjek · <span id="klizN">0</span> fillova</span>
+        <span style="margin-left:auto;font-size:12px;color:var(--tx2)">≈ <span id="klizTrosak">—</span>/trejd</span>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--tx3)">
+        <span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#CBD5E1"></i> 0</span>
+        <span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#4F46E5"></i> 1 tik</span>
+        <span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#F59E0B"></i> 2</span>
+        <span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--red)"></i> 3+</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card"><div class="hd"><b>Napredak prema kapiji</b></div>
+    <div class="pad">
+      <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--tx2)">buy strana · long noge</span>
+        <span><b id="buyN">0</b>/30 <span style="color:var(--tx3)" id="buyK"></span></span></div>
+      <div style="height:6px;background:var(--bd2);border-radius:3px;margin:5px 0 14px;overflow:hidden"><i id="buyBar" style="display:block;height:100%;background:var(--ind);width:0"></i></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--tx2)">sell strana · short noge</span>
+        <span><b id="sellN">0</b>/30 <span style="color:var(--tx3)" id="sellK"></span></span></div>
+      <div style="height:6px;background:var(--bd2);border-radius:3px;margin:5px 0 0;overflow:hidden"><i id="sellBar" style="display:block;height:100%;background:#0EA5E9;width:0"></i></div>
+      <div style="font-size:11.5px;color:var(--tx3);margin-top:12px;line-height:1.6">Kad obje strane pređu 30 fillova, bira se između originala, varijante B i račne. Do tada se ne mijenja ništa.</div>
+    </div>
+  </div>
+
+  <div class="card"><div class="hd"><b>Izlazi</b><span class="pill" id="eodPill"></span></div>
+    <div class="pad">
+      <div style="display:flex;height:26px;border-radius:7px;overflow:hidden;border:1px solid var(--bd)" id="exitBar"></div>
+      <div style="display:flex;gap:14px;margin-top:9px;font-size:11px;color:var(--tx3)">
+        <span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--grn)"></i> target</span>
+        <span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#94A3B8"></i> stop</span>
+        <span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--red)"></i> EOD</span>
+      </div>
+      <div style="font-size:11.5px;color:var(--tx3);margin-top:11px;line-height:1.6" id="eodNote"></div>
+    </div>
+  </div>
+
+  <div class="card"><div class="hd"><b>Po nogama</b></div><div class="pad" id="legList"></div></div>
+  </div>
+</section>
+
+<!-- ============ STATISTIKA ============ -->
+<section id="s-stats" class="sec">
+  <div class="card"><div class="pad">
+    <div class="grid2" style="margin-bottom:15px">
+      <div class="box"><div class="lbl">Win rate</div><div id="kWR" style="font-size:19px;font-weight:700;margin-top:2px">—</div>
+        <div class="bar"><i id="kWRb" style="background:var(--grn)"></i></div><div style="font-size:9px;color:var(--tx3);margin-top:5px">breakeven 32,2 %</div></div>
+      <div class="box"><div class="lbl">Profit factor</div><div id="kPF" style="font-size:19px;font-weight:700;margin-top:2px">—</div>
+        <div class="bar"><i id="kPFb" style="background:var(--ind)"></i></div><div id="kN" style="font-size:9px;color:var(--tx3);margin-top:5px"></div></div>
+      <div class="box"><div class="lbl">Prosjek</div><div id="kAvg" style="font-size:19px;font-weight:700;margin-top:2px" class="g">—</div>
+        <div id="kAvgU" style="font-size:9px;color:var(--tx3);margin-top:11px"></div></div>
+      <div class="box" style="background:#FEF2F2;border-color:#FECACA"><div class="lbl" style="color:#B91C1C">Drawdown</div>
+        <div id="kDD" style="font-size:19px;font-weight:700;margin-top:2px" class="r">—</div>
+        <div class="bar" style="background:#FECACA"><i id="kDDb" style="background:var(--red)"></i></div>
+        <div id="kDDp" style="font-size:9px;color:#B91C1C;margin-top:5px"></div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px">
+      <h3>Equity</h3><span style="font-size:10px;color:var(--tx3)" id="eqDays"></span>
+    </div>
+    <svg id="eq" viewBox="0 0 300 80" style="width:100%;height:80px;display:block"></svg>
+    <div style="margin-top:15px;padding-top:14px;border-top:1px solid var(--bd2)">
+      <div style="font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:9px">Po setupu</div>
+      <div id="bySetup"></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ KALENDAR ============ -->
+<section id="s-cal" class="sec">
+  <div class="card"><div class="pad">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:13px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span onclick="mv(-1)" style="color:#CBD5E1;font-size:18px;cursor:pointer;user-select:none">‹</span>
+        <h3 id="calM">—</h3>
+        <span onclick="mv(1)" style="color:#CBD5E1;font-size:18px;cursor:pointer;user-select:none">›</span>
+      </div>
+      <span id="calSum" style="font-size:11px;font-weight:600"></span>
+    </div>
+    <div class="cal" style="margin-bottom:6px"><div class="wd">P</div><div class="wd">U</div><div class="wd">S</div><div class="wd">Č</div><div class="wd">P</div><div class="wd">S</div><div class="wd">N</div></div>
+    <div class="cal" id="calGrid"></div>
+    <div style="display:flex;align-items:center;gap:5px;margin-top:13px;font-size:9px;color:var(--tx3);font-weight:500">
+      <span>Gubitak</span>
+      <span style="width:15px;height:9px;border-radius:2px;background:var(--red3)"></span>
+      <span style="width:15px;height:9px;border-radius:2px;background:var(--red2)"></span>
+      <span style="width:15px;height:9px;border-radius:2px;background:var(--sf);border:1px solid var(--bd)"></span>
+      <span style="width:15px;height:9px;border-radius:2px;background:var(--grn2)"></span>
+      <span style="width:15px;height:9px;border-radius:2px;background:var(--grn3)"></span>
+      <span>Dobitak</span>
+    </div>
+    <div class="grid3" style="margin-top:14px;padding-top:13px;border-top:1px solid var(--bd2);text-align:center">
+      <div><div class="lbl">Zeleni</div><div id="cG" class="g" style="font-size:15px;font-weight:700;margin-top:2px"></div></div>
+      <div><div class="lbl">Crveni</div><div id="cR" class="r" style="font-size:15px;font-weight:700;margin-top:2px"></div></div>
+      <div><div class="lbl">Bez trejda</div><div id="cN" class="m" style="font-size:15px;font-weight:700;margin-top:2px"></div></div>
+    </div>
+  </div></div>
+  <div id="dayDetail"></div>
+</section>
+
+<!-- ============ TREJDOVI ============ -->
+<section id="s-trades" class="sec">
+  <div class="card"><div class="pad">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px">
+      <h3>Svi trejdovi</h3><span id="trN" style="font-size:11px;color:var(--tx3)"></span>
+    </div>
+    <div id="trList"></div>
+  </div></div>
+</section>
+
+<!-- ============ DETALJ TREJDA ============ -->
+<section id="s-one" class="sec"><div id="oneBody"></div></section>
+
+</div>
+
+<nav>
+  <b class="on" data-t="today"><i>◧</i>Danas</b>
+  <b data-t="kapije"><i>◈</i>Kapije</b>
+  <b data-t="stats"><i>◱</i>Statistika</b>
+  <b data-t="cal"><i>▦</i>Kalendar</b>
+  <b data-t="trades"><i>≡</i>Trejdovi</b>
+</nav>
+
+<script>
+let D_ALL={days:{},trades:[],today:'',open:null}, D={days:{},trades:[],today:'',open:null}, ACCT='ALL';
+
+function primijeni(){
+  const t = ACCT==='ALL' ? D_ALL.trades : D_ALL.trades.filter(x=>x.acct===ACCT);
+  const ids = new Set(t.map(x=>x.id));
+  const days = {};
+  for(const d in (D_ALL.days||{})) days[d] = {pnl:0, trades:[]};
+  for(const x of t){
+    (days[x.date] = days[x.date] || {pnl:0,trades:[]});
+    days[x.date].pnl = Math.round((days[x.date].pnl + x.usd)*10)/10;
+    days[x.date].trades.push(x.id);
+  }
+  D = Object.assign({}, D_ALL, {trades:t, days:days,
+        open: (D_ALL.open && (ACCT==='ALL' || D_ALL.open.acct===ACCT)) ? D_ALL.open : null});
+  if(typeof boot==='function') boot();
+}
+document.addEventListener('click', e=>{
+  const b = e.target.closest('#acctBar .ab'); if(!b) return;
+  document.querySelectorAll('#acctBar .ab').forEach(x=>x.classList.toggle('on', x===b));
+  ACCT = b.dataset.a; primijeni();
+});
+async function ucitaj(){
+  try{
+    const r = await fetch('data.json?t='+Date.now(), {cache:'no-store'});
+    if(!r.ok) throw new Error('data.json '+r.status);
+    D_ALL = await r.json();
+    // sakrij prekidac ako postoji samo jedan racun
+    const rac = Object.keys(D_ALL.racuni || {});
+    if(rac.length < 2) document.querySelectorAll('#acctBar .ab').forEach(b=>{ if(b.dataset.a!=='ALL') b.style.display='none'; });
+    primijeni();
+    const el=document.getElementById('azur');
+    if(el) el.textContent = 'ažurirano '+(D.azurirano||'—');
+  }catch(e){
+    document.body.insertAdjacentHTML('afterbegin',
+      '<div style="background:#3a1f1f;color:#ffb4b4;padding:10px 14px;font:13px system-ui">Ne mogu učitati data.json — '+e.message+'</div>');
+  }
+}
+setInterval(ucitaj, 120000);   // osvjezi svake 2 min
+const T={}; D.trades.forEach(t=>T[t.id]=t);
+const f=(n,d=0)=>(n>0?"+":"")+n.toLocaleString("bs-BA",{minimumFractionDigits:d,maximumFractionDigits:d});
+const dkeys=Object.keys(D.days).sort();
+let curM=7, curY=2026, selDay=null;
+
+// ---------- DANAS ----------
+function renderToday(){
+  const td=D.days[D.today]||{pnl:0,trades:[]};
+  const el=document.getElementById("tPnl");
+  el.textContent=f(td.pnl,0); el.className="big "+(td.pnl>=0?"g":"r");
+  document.getElementById("tR").textContent=f(td.pnl/48,1)+"R";
+  // mjesec
+  let m=0; dkeys.forEach(k=>{if(k.startsWith(D.today.slice(0,7)))m+=D.days[k].pnl});
+  const me=document.getElementById("mPnl"); me.textContent=f(m,0)+" $"; me.className=m>=0?"g":"r";
+  let a=0; dkeys.forEach(k=>a+=D.days[k].pnl);
+  document.getElementById("aPnl").textContent=f(a,0)+" $";
+  // otvorena pozicija
+  const o=D.open;
+  const rng=o.t2-o.stop, pos=Math.max(0,Math.min(1,(o.cur-o.stop)/rng)), ent=(o.entry-o.stop)/rng;
+  document.getElementById("openWrap").innerHTML=`
+   <div class="pad" style="padding-top:0;padding-bottom:16px"><div class="box" style="border-radius:12px;padding:13px 14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="badge bg">${o.setup} ${o.dir}</span>
+        <span style="font-size:11px;color:var(--tx2)">${o.qty} MES · ${o.in}</span></div>
+      <span style="font-size:17px;font-weight:700" class="${o.usd>=0?'g':'r'}">${f(o.usd,0)} $</span></div>
+    <div style="position:relative;height:22px">
+      <div style="position:absolute;top:9px;left:0;right:0;height:5px;background:var(--bd);border-radius:3px"></div>
+      <div style="position:absolute;top:9px;left:${ent*100}%;width:${Math.max(0,(pos-ent))*100}%;height:5px;background:var(--grn);border-radius:3px"></div>
+      <div style="position:absolute;top:4px;left:${ent*100}%;width:2px;height:15px;background:var(--tx2)"></div>
+      <div style="position:absolute;top:2px;left:calc(${pos*100}% - 8px);width:16px;height:19px;border-radius:5px;background:var(--grn);border:2px solid #fff;box-shadow:0 1px 4px rgba(22,163,74,.4)"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);margin-top:4px;font-weight:500">
+      <span>stop ${o.stop}</span><span style="color:#475569">ulaz ${o.entry}</span><span>6R ${o.t2}</span></div>
+   </div></div>`;
+  document.getElementById("tToday").innerHTML = td.trades.length
+    ? td.trades.map(id=>trRow(T[id])).join("") + trRow(null,o)
+    : trRow(null,o);
+}
+function trRow(t,op){
+  if(op) return `<div class="row" style="border-color:#BBF7D0;background:#F0FDF4">
+    <span class="badge bg">${op.setup}</span>
+    <div style="flex:1"><div style="font-size:12px;font-weight:500">${op.dir==='LONG'?'Long':'Short'} · ${op.qty} MES</div>
+    <div style="font-size:10px;color:var(--tx3);margin-top:1px">${op.in} → otvoren</div></div>
+    <div style="text-align:right"><div style="font-size:14px;font-weight:700" class="g">${f(op.usd,0)} $</div>
+    <div style="font-size:10px;color:var(--tx3)">u toku</div></div></div>`;
+  return `<div class="row" onclick="openTrade(${t.id})">
+    <span class="badge ${t.usd>=0?'bg':'br'}">${t.setup}</span>
+    <div style="flex:1"><div style="font-size:12px;font-weight:500">${t.dir==='LONG'?'Long':'Short'} · ${t.qty} MES</div>
+    <div style="font-size:10px;color:var(--tx3);margin-top:1px">${t.in} · ${t.exit}</div></div>
+    <div style="text-align:right"><div style="font-size:14px;font-weight:700" class="${t.usd>=0?'g':'r'}">${f(t.usd,0)} $</div>
+    <div style="font-size:10px;color:var(--tx3)">${f(t.R,1)}R</div></div></div>`;
+}
+
+// ---------- STATISTIKA ----------
+function renderStats(){
+  const tr=D.trades, w=tr.filter(t=>t.usd>0), l=tr.filter(t=>t.usd<0);
+  const wr=w.length/tr.length*100;
+  const pf=w.reduce((s,t)=>s+t.usd,0)/Math.abs(l.reduce((s,t)=>s+t.usd,0)||1);
+  const avg=tr.reduce((s,t)=>s+t.R,0)/tr.length;
+  document.getElementById("kWR").textContent=wr.toFixed(1)+" %";
+  document.getElementById("kWRb").style.width=wr+"%";
+  document.getElementById("kPF").textContent=pf.toFixed(2);
+  document.getElementById("kPFb").style.width=Math.min(100,pf*40)+"%";
+  document.getElementById("kN").textContent=tr.length+" trejdova";
+  document.getElementById("kAvg").textContent=f(avg,2)+"R";
+  document.getElementById("kAvgU").textContent=f(tr.reduce((s,t)=>s+t.usd,0)/tr.length,0)+" $ / trejd";
+  // equity + dd
+  let e=0,pk=0,dd=0; const pts=[];
+  dkeys.forEach(k=>{e+=D.days[k].pnl; pk=Math.max(pk,e); dd=Math.min(dd,e-pk); pts.push(e)});
+  document.getElementById("kDD").textContent=f(dd,0)+" $";
+  document.getElementById("kDDb").style.width=Math.min(100,Math.abs(dd)/1000*100)+"%";
+  document.getElementById("kDDp").textContent=Math.round(Math.abs(dd)/1000*100)+" % MLL-a (1.000 $)";
+  document.getElementById("eqDays").textContent=dkeys.length+" dana";
+  // svg
+  const W=300,H=80,mn=Math.min(0,...pts),mx=Math.max(...pts);
+  const X=i=>i/(pts.length-1)*W, Y=v=>H-8-(v-mn)/((mx-mn)||1)*(H-16);
+  const dpath=pts.map((v,i)=>(i?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1)).join(" ");
+  document.getElementById("eq").innerHTML=
+    `<defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1">
+     <stop offset="0" stop-color="#4F46E5" stop-opacity=".16"/><stop offset="1" stop-color="#4F46E5" stop-opacity="0"/></linearGradient></defs>
+     <line x1="0" y1="${Y(0)}" x2="300" y2="${Y(0)}" stroke="#F1F5F9"/>
+     <path d="${dpath} L300 ${H} L0 ${H} Z" fill="url(#gg)"/>
+     <path d="${dpath}" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linejoin="round"/>
+     <circle cx="${X(pts.length-1)}" cy="${Y(pts[pts.length-1])}" r="3.5" fill="#4F46E5" stroke="#fff" stroke-width="2"/>`;
+  // po setupu
+  const bs={}; tr.forEach(t=>bs[t.setup]=(bs[t.setup]||0)+t.usd);
+  const mxv=Math.max(...Object.values(bs).map(Math.abs));
+  document.getElementById("bySetup").innerHTML=Object.entries(bs).sort((a,b)=>b[1]-a[1]).map(([s,v])=>
+    `<div style="display:flex;align-items:center;gap:9px;margin-bottom:7px">
+     <span style="width:26px;font-size:10px;font-weight:700;color:#475569">${s}</span>
+     <div style="flex:1;height:20px;background:#F1F5F9;border-radius:4px">
+       <div style="width:${Math.abs(v)/mxv*100}%;height:20px;background:${v>=0?'var(--grn)':'var(--red)'};border-radius:4px"></div></div>
+     <span style="width:56px;text-align:right;font-size:11px;font-weight:600">${f(v,0)} $</span></div>`).join("");
+}
+
+// ---------- KALENDAR ----------
+const MN=["Januar","Februar","Mart","April","Maj","Juni","Juli","August","Septembar","Oktobar","Novembar","Decembar"];
+function mv(n){curM+=n; if(curM<0){curM=11;curY--} if(curM>11){curM=0;curY++} renderCal()}
+function renderCal(){
+  document.getElementById("calM").textContent=MN[curM]+" "+curY;
+  const first=new Date(curY,curM,1), nd=new Date(curY,curM+1,0).getDate();
+  let pad=(first.getDay()+6)%7, h="", sum=0, g=0,r=0,z=0;
+  const vals=dkeys.filter(k=>k.startsWith(`${curY}-${String(curM+1).padStart(2,"0")}`)).map(k=>Math.abs(D.days[k].pnl));
+  const mxv=Math.max(1,...vals);
+  for(let i=0;i<pad;i++)h+="<div></div>";
+  for(let d=1;d<=nd;d++){
+    const key=`${curY}-${String(curM+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const inf=D.days[key];
+    if(!inf){h+=`<div class="cell" style="background:transparent"></div>`;continue}
+    sum+=inf.pnl;
+    if(inf.trades.length===0){z++;h+=`<div class="cell"></div>`;continue}
+    inf.pnl>0?g++:r++;
+    const a=.25+.6*Math.abs(inf.pnl)/mxv;
+    const bg=inf.pnl>0?`rgba(22,163,74,${a})`:`rgba(220,38,38,${a})`;
+    const col=Math.abs(inf.pnl)/mxv>.55?"#fff":(inf.pnl>0?"#14532D":"#7F1D1D");
+    h+=`<div class="cell t ${key===selDay?'sel':''}" style="background:${bg};color:${col}" onclick="showDay('${key}')">${Math.round(Math.abs(inf.pnl))}</div>`;
+  }
+  document.getElementById("calGrid").innerHTML=h;
+  const cs=document.getElementById("calSum"); cs.textContent=f(sum,0)+" $"; cs.className=sum>=0?"g":"r";
+  document.getElementById("cG").textContent=g; document.getElementById("cR").textContent=r; document.getElementById("cN").textContent=z;
+}
+function showDay(k){
+  selDay=k; renderCal();
+  const inf=D.days[k], dt=new Date(k+"T12:00");
+  const dn=["Nedjelja","Ponedjeljak","Utorak","Srijeda","Četvrtak","Petak","Subota"][dt.getDay()];
+  document.getElementById("dayDetail").innerHTML=`<div class="card"><div class="pad">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div><h3>${dn}, ${dt.getDate()}. ${MN[dt.getMonth()].toLowerCase()}</h3>
+      <div class="sub">${inf.trades.length} trejd${inf.trades.length===1?"":"a"}</div></div>
+      <span style="font-size:19px;font-weight:700" class="${inf.pnl>=0?'g':'r'}">${f(inf.pnl,0)} $</span></div>
+    ${inf.trades.map(id=>trRow(T[id])).join("")||'<div style="font-size:12px;color:var(--tx3)">Nema trejdova.</div>'}
+  </div></div>`;
+  document.getElementById("dayDetail").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+// ---------- SVI TREJDOVI ----------
+function renderTrades(){
+  document.getElementById("trN").textContent=D.trades.length+" ukupno";
+  document.getElementById("trList").innerHTML=D.trades.slice().reverse().map(t=>
+    `<div class="row" onclick="openTrade(${t.id})">
+      <span class="badge ${t.usd>=0?'bg':'br'}">${t.setup}</span>
+      <div style="flex:1"><div style="font-size:12px;font-weight:500">${t.date.slice(5).replace("-",".")}. · ${t.dir==='LONG'?'Long':'Short'}</div>
+      <div style="font-size:10px;color:var(--tx3);margin-top:1px">${t.in} · ${t.exit} · ${t.dur}m</div></div>
+      <div style="text-align:right"><div style="font-size:14px;font-weight:700" class="${t.usd>=0?'g':'r'}">${f(t.usd,0)} $</div>
+      <div style="font-size:10px;color:var(--tx3)">${f(t.R,1)}R</div></div></div>`).join("");
+}
+
+// ---------- DETALJ TREJDA ----------
+function openTrade(id){
+  const t=T[id]; const W=320,H=150;
+  const yy=v=>{ // v u R -> y
+    const top=-1.2, bot=6.5;
+    return 12+(bot-v)/(bot-top)*(H-30);
+  };
+  const pk=t.mfe, low=t.mae;
+  const N=16, path=[];
+  for(let i=0;i<=N;i++){
+    const x=8+i/N*(W-50);
+    let v;
+    const peakAt=.45;
+    if(i/N<peakAt) v=low+(pk-low)*Math.pow(i/N/peakAt,.75);
+    else v=pk-(pk-t.R)*Math.pow((i/N-peakAt)/(1-peakAt),1.3);
+    path.push((i?"L":"M")+x.toFixed(1)+" "+yy(v).toFixed(1));
+  }
+  const halfX=8+peakXfrac()*(W-50);
+  function peakXfrac(){return .45}
+  const wrap=document.getElementById("oneBody");
+  wrap.innerHTML=`<div class="back" onclick="go('${lastTab}')">‹ nazad</div>
+  <div class="card">
+    <div class="hd" style="align-items:flex-start">
+      <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span class="badge ${t.usd>=0?'bg':'br'}">${t.setup} ${t.dir}</span>
+        <span style="font-size:11px;color:var(--tx3)">${t.date.slice(8)}.${t.date.slice(5,7)}. · ${t.qty} MES</span></div>
+        <div style="font-size:12px;color:var(--tx2)">ulaz ${t.entry} · stop ${t.stop}</div></div>
+      <div style="text-align:right"><div style="font-size:26px;font-weight:700;letter-spacing:-.6px" class="${t.usd>=0?'g':'r'}">${f(t.usd,0)} $</div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:1px">${f(t.R,1)}R od mogućih 4,5R</div></div>
+    </div>
+    <div class="pad" style="padding-bottom:8px">
+      <div style="font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:10px">Putanja cijene</div>
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+        <line x1="0" y1="${yy(6)}" x2="278" y2="${yy(6)}" stroke="#BBF7D0" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="282" y="${yy(6)+3}" font-size="8" fill="#15803D" font-weight="600">6R</text>
+        <line x1="0" y1="${yy(3)}" x2="278" y2="${yy(3)}" stroke="#86EFAC" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="282" y="${yy(3)+3}" font-size="8" fill="#15803D" font-weight="600">3R</text>
+        <line x1="0" y1="${yy(0)}" x2="278" y2="${yy(0)}" stroke="#94A3B8" stroke-width="1.5"/>
+        <text x="282" y="${yy(0)+3}" font-size="8" fill="#475569" font-weight="600">ulaz</text>
+        <line x1="0" y1="${yy(-1)}" x2="278" y2="${yy(-1)}" stroke="#FCA5A5" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="282" y="${yy(-1)+3}" font-size="8" fill="#B91C1C" font-weight="600">stop</text>
+        <rect x="0" y="${yy(6)}" width="278" height="${yy(3)-yy(6)}" fill="#16A34A" opacity=".05"/>
+        <path d="${path.join(" ")}" fill="none" stroke="#334155" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="8" cy="${yy(0)}" r="4" fill="#4F46E5" stroke="#fff" stroke-width="2"/>
+        <circle cx="${halfX}" cy="${yy(pk)}" r="4" fill="#86EFAC" stroke="#fff" stroke-width="1.5"/>
+        <text x="${halfX}" y="${yy(pk)-8}" font-size="8" fill="#15803D" text-anchor="middle" font-weight="600">MFE ${f(pk,1)}R</text>
+        <circle cx="${W-42}" cy="${yy(t.R)}" r="4.5" fill="${t.usd>=0?'#16A34A':'#DC2626'}" stroke="#fff" stroke-width="2"/>
+        <text x="${W-42}" y="${yy(t.R)+16}" font-size="8" fill="#475569" text-anchor="middle" font-weight="600">${t.exit}</text>
+      </svg>
+    </div>
+    <div class="pad" style="padding-top:6px;padding-bottom:14px"><div class="grid3">
+      <div class="box" style="text-align:center"><div class="lbl">MFE</div><div class="g" style="font-size:15px;font-weight:700;margin-top:2px">${f(t.mfe,1)}R</div></div>
+      <div class="box" style="text-align:center"><div class="lbl">MAE</div><div class="r" style="font-size:15px;font-weight:700;margin-top:2px">${f(t.mae,2)}R</div></div>
+      <div class="box" style="text-align:center"><div class="lbl">Trajanje</div><div style="font-size:15px;font-weight:700;margin-top:2px">${t.dur}m</div></div>
+    </div></div>
+    <div class="pad" style="padding-top:0">
+      <div style="font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:9px">Tok</div>
+      <div class="tl">
+        <div><i style="background:#4F46E5"></i><div style="font-size:11px;color:var(--tx3);font-weight:500">${t.in} · fill</div>
+          <div style="font-size:12px;margin-top:1px">${t.qty} MES @ <b>${t.entry}</b> · stop ${t.stop} · bracket ✓</div></div>
+        ${t.R>=1.5?`<div><i style="background:#16A34A"></i><div style="font-size:11px;color:var(--tx3);font-weight:500">target 3R</div>
+          <div style="font-size:12px;margin-top:1px">1 MES · <span class="g" style="font-weight:600">${f(t.usd/(t.R/1.5),0)} $</span> · stop → break-even</div></div>`:""}
+        <div><i style="background:#86EFAC"></i><div style="font-size:11px;color:var(--tx3);font-weight:500">vrh</div>
+          <div style="font-size:12px;margin-top:1px">MFE ${f(t.mfe,1)}R${t.mfe<6?` — falilo ${(6-t.mfe).toFixed(1)}R do 6R`:""}</div></div>
+        <div><i style="background:${t.usd>=0?'#16A34A':'#DC2626'}"></i><div style="font-size:11px;color:var(--tx3);font-weight:500">izlaz · ${t.exit}</div>
+          <div style="font-size:12px;margin-top:1px"><span class="${t.usd>=0?'g':'r'}" style="font-weight:600">${f(t.usd,0)} $</span> · ${f(t.R,1)}R</div></div>
+      </div>
+    </div>
+    ${t.mfe>=3&&t.R<3?`<div class="tip"><span>💡</span><div>Runner je stigao do <b>${f(t.mfe,1)}R</b> pa se vratio. To se dešava u <b>9 %</b> trejdova — izmjereno je da rani izlaz na povratku košta <b>−0,029R</b> po trejdu. Pravilo ostaje.</div></div>`:""}
+    ${t.R<=-1?`<div class="tip"><span>💡</span><div>Pun stop. Gubici su <b>uniformni</b> po dizajnu — profit dolazi iz rijetkih 3R i 6R trejdova. Nijedan pojedinačni gubitak ne definiše sistem.</div></div>`:""}
+  </div>`;
+  go("one");
+}
+
+// ---------- NAV ----------
+let lastTab="today";
+function go(t){
+  if(t!=="one") lastTab=t;
+  document.querySelectorAll(".sec").forEach(s=>s.classList.remove("on"));
+  document.getElementById("s-"+t).classList.add("on");
+  document.querySelectorAll("nav b").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
+  window.scrollTo({top:0,behavior:"instant"});
+}
+document.querySelectorAll("nav b").forEach(b=>b.onclick=()=>go(b.dataset.t));
+
+
+// ---------- KAPIJE ----------
+function renderKapije(){
+  const tr=D.trades||[];
+  const buy=tr.filter(t=>t.dir==="LONG"&&t.kliz!=null).map(t=>Math.max(0,t.kliz));
+  const sell=tr.filter(t=>t.dir==="SHORT"&&t.kliz!=null).map(t=>Math.max(0,t.kliz));
+  const sve=buy.concat(sell);
+  const sr=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+  const avg=sr(sve);
+
+  // traka
+  const z=sve.slice(-56);
+  document.getElementById("tape").innerHTML = z.length ? z.map(v=>{
+    const h = v<=0.01?6 : v<=1.01?20 : v<=2.01?37 : 53;
+    const c = v<=0.01?"#CBD5E1" : v<=1.01?"#4F46E5" : v<=2.01?"#F59E0B" : "#DC2626";
+    return '<i style="flex:1 1 0;min-width:3px;max-width:12px;height:'+h+'px;background:'+c+';border-radius:2px 2px 0 0" title="'+v+' tik"></i>';
+  }).join("") : '<span style="font-size:12px;color:var(--tx3);align-self:center">Još nema fillova.</span>';
+
+  document.getElementById("klizAvg").textContent = sve.length? avg.toFixed(2) : "—";
+  document.getElementById("klizN").textContent = sve.length;
+  document.getElementById("klizTrosak").textContent = "$"+(avg*1.25+1.5).toFixed(2);
+  const sud = !sve.length ? ["Čekam fillove",""] :
+              avg<=1.2 ? ["Original drži","ok"] :
+              avg<=2   ? ["Granično","warn"] : ["Skupo za ES","bad"];
+  const sp=document.getElementById("klizSud");
+  sp.textContent=sud[0];
+  sp.style.background = sud[1]==="ok"?"var(--grn2)":sud[1]==="warn"?"#FEF3C7":sud[1]==="bad"?"var(--red2)":"var(--bd2)";
+  sp.style.color = sud[1]==="ok"?"var(--grn)":sud[1]==="warn"?"#B45309":sud[1]==="bad"?"var(--red)":"var(--tx2)";
+
+  document.getElementById("buyN").textContent=buy.length;
+  document.getElementById("sellN").textContent=sell.length;
+  document.getElementById("buyK").textContent=buy.length?sr(buy).toFixed(2)+" tik":"";
+  document.getElementById("sellK").textContent=sell.length?sr(sell).toFixed(2)+" tik":"";
+  document.getElementById("buyBar").style.width=Math.min(100,buy.length/30*100)+"%";
+  document.getElementById("sellBar").style.width=Math.min(100,sell.length/30*100)+"%";
+
+  // izlazi
+  const c={target:0,stop:0,eod:0};
+  tr.forEach(t=>{ if(c[t.exit]!==undefined)c[t.exit]++; });
+  const n=(c.target+c.stop+c.eod)||1;
+  document.getElementById("exitBar").innerHTML =
+    '<div style="width:'+(c.target/n*100)+'%;background:var(--grn);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff">'+(c.target||"")+'</div>'+
+    '<div style="width:'+(c.stop/n*100)+'%;background:#94A3B8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff">'+(c.stop||"")+'</div>'+
+    '<div style="width:'+(c.eod/n*100)+'%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff">'+(c.eod||"")+'</div>';
+  const eodU=c.eod/n;
+  document.getElementById("eodNote").textContent = eodU>0.15
+    ? "Previše izlazaka na kraju dana. Provjeri da bracket stiže na server — očekivano je oko 2 %."
+    : "Bracket nosi izlaze. Očekivano je oko 2 % na kraju dana.";
+  const ep=document.getElementById("eodPill");
+  ep.textContent = eodU>0.15 ? "provjeri" : "ok";
+  ep.style.background = eodU>0.15?"var(--red2)":"var(--grn2)";
+  ep.style.color = eodU>0.15?"var(--red)":"var(--grn)";
+
+  // noge
+  const g={};
+  tr.forEach(t=>{ (g[t.setup]=g[t.setup]||{n:0,pnl:0,win:0,kl:[],dir:t.dir,acct:t.acct});
+    const x=g[t.setup]; x.n++; x.pnl+=t.usd; if(t.exit==="target")x.win++;
+    if(t.kliz!=null)x.kl.push(Math.max(0,t.kliz)); });
+  const keys=Object.keys(g).sort();
+  document.getElementById("legList").innerHTML = keys.length ? keys.map(k=>{
+    const x=g[k], kk=x.kl.length?(x.kl.reduce((a,b)=>a+b,0)/x.kl.length).toFixed(2):"—";
+    const col=x.dir==="LONG"?"#0EA5E9":"#F59E0B";
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd2)">'+
+      '<div><div style="font-weight:600;font-size:13.5px"><i style="display:inline-block;width:3px;height:13px;background:'+col+';border-radius:2px;margin-right:7px;vertical-align:-2px"></i>'+k+'</div>'+
+      '<div style="font-size:11px;color:var(--tx3);margin-left:10px">'+x.acct+' · '+x.n+' trejdova · pogodak '+(x.win/x.n*100).toFixed(0)+'% · klizanje '+kk+' tik</div></div>'+
+      '<div style="font-weight:700;color:'+(x.pnl>=0?"var(--grn)":"var(--red)")+'">'+f(x.pnl,0)+' $</div></div>';
+  }).join("") : '<div style="font-size:12.5px;color:var(--tx3);text-align:center;padding:14px">Noge još nisu trgovale.</div>';
+}
+
+function boot(){ renderToday(); renderKapije(); renderStats(); renderCal(); renderTrades(); }
+ucitaj();   // povuci data.json s GitHub Pages, pa iscrtaj
+</script></body></html>
